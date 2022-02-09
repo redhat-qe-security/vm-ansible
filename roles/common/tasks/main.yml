@@ -1,0 +1,72 @@
+---
+- name: Check image name
+  stat:
+    path: "{{ img_path }}"
+  register: img_stat_result
+
+- name: Copy image
+  copy:
+    src: "{{ base_img }}"
+    dest: "{{ img_path }}"
+  when: not img_stat_result.stat.exists
+
+- name: Check SSh key
+  stat:
+    path: "{{ssh_key}}"
+  register: stat_result
+
+- name: Generate key
+  openssh_keypair:
+    path: "{{ ssh_key }}"
+    type: rsa
+    size: 4096
+    state: present
+    force: no
+  when: not stat_result.stat.exists
+
+- name: Check repo file
+  file:
+    path: "{{ repo_file }}"
+    state: file
+
+- name: Prepare VM (virt-sysprep)
+  shell:
+    cmd: |
+      virt-sysprep --uninstall cloud-init \
+          --selinux-relabel \
+          --root-password password:redhat \
+          --ssh-inject root:file:"{{ ssh_key }}.pub" \
+          --upload "{{ repo_file }}":/etc/yum.repos.d/redhat.repo \
+          -a "{{ img_path }}"
+  register: virt
+
+
+- debug: var=virt.stdout_lines
+
+
+- name: Show list
+  shell: virsh list --all
+  register: virt
+
+
+- debug: var=virt.stdout_lines
+
+# - name: Delete existing domain
+#   shell:
+#     cmd: virsh destroy "{{ img_name }}"
+
+#   register: virt
+
+# - debug: var=virt.stdout_lines
+
+- name: Install VM (virt-install)
+  shell:
+    cmd: |
+      virt-install --import --memory 2048 --vcpus 2 --noautoconsole --os-variant rhel-unknown \
+                   --name "{{ img_name }}" --check all=off --disk path="{{ img_path }}" 
+  register: virt
+
+- debug: var=virt.stdout_lines
+
+
+# - name: Add VM to SSH config file to quick login
