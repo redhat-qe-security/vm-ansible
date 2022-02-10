@@ -37,36 +37,32 @@
           --root-password password:redhat \
           --ssh-inject root:file:"{{ ssh_key }}.pub" \
           --upload "{{ repo_file }}":/etc/yum.repos.d/redhat.repo \
-          -a "{{ img_path }}"
-  register: virt
-
-
-- debug: var=virt.stdout_lines
-
-
-- name: Show list
-  shell: virsh list --all
-  register: virt
-
-
-- debug: var=virt.stdout_lines
-
-# - name: Delete existing domain
-#   shell:
-#     cmd: virsh destroy "{{ img_name }}"
-
-#   register: virt
-
-# - debug: var=virt.stdout_lines
+          -a "{{ img_path }}" \
+          -c qemu:///system
 
 - name: Install VM (virt-install)
   shell:
     cmd: |
-      virt-install --import --memory 2048 --vcpus 2 --noautoconsole --os-variant rhel-unknown \
+      virt-install --connect qemu:///system --import --memory 2048 --vcpus 2 --noautoconsole --os-variant rhel-unknown \
                    --name "{{ img_name }}" --check all=off --disk path="{{ img_path }}" 
-  register: virt
 
-- debug: var=virt.stdout_lines
+- name: Get "{{ img_name }}" IP address
+  shell: virsh domifaddr "{{ img_name }}"  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
+  register: ip_addr
+  until: ip_addr.stdout | ipaddr
+  retries: 10
+  delay: 6
 
 
-# - name: Add VM to SSH config file to quick login
+- name: Add "{{ img_name }}" to SSH config file
+  blockinfile:
+    path: /home/{{ ansible_user_id }}/.ssh/config
+    backup: yes
+    block: |
+      Host {{ img_name }}
+        Hostname {{ ip_addr.stdout }}
+        Preferredauthentications publickey
+        User root
+        UserKnownHostsFile /dev/null
+        StrictHostKeyChecking no
+        IdentityFile {{ key_file }}

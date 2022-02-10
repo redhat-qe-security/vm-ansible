@@ -2,6 +2,6 @@
 # defaults file for common
 rhel: "8.6"
 name_: "rhel-guest-image-8.6-1200"
-image: "/home/pyadlous/os_dir/{{ name_ }}.x86_64.qcow2" 
-key_file: "{{ name_ }}-rhel-{{ rhel }}"
-img_path: "/home/pyadlous/os_dir/{{ name_ }}.qcow2"
+image: "/home/{{ ansible_user_id }}/os_dir/rhel-guest-image-8.6-1200.x86_64.qcow2" 
+key_file: "/home/{{ ansible_user_id }}/.ssh/{{ name_ }}-rhel-{{ rhel }}"
+img_path: "/home/{{ ansible_user_id }}/os_dir/{{ name_ }}.qcow2"
