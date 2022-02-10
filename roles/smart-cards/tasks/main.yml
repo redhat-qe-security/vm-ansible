@@ -1,0 +1,7 @@
+---
+- name: Get my IP
+  shell: ip a
+  register: vm_ip
+
+- debug:
+    msg: "{{ vm_ip.stdout }}"
