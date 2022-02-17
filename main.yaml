@@ -1,7 +1,7 @@
 ---
 - hosts: 127.0.0.1
   connection: local
-  
+
   roles:
     - role: common
       vars:
@@ -10,3 +10,10 @@
         base_img: "{{ image }}"
         ssh_key: "{{ key_file }}"
         repo_file: "./roles/common/files/redhat-{{rhel}}.repo"
+
+- hosts: vm
+  tasks:
+  - name: Upgrade all packages
+    dnf:
+      name: "*"
+      state: latest
