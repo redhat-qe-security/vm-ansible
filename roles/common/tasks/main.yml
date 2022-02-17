@@ -53,6 +53,8 @@
   retries: 10
   delay: 6
 
+- name: Create initial snapshot
+  shell: virsh snapshot-create-as --domain "{{ img_name }}" --name "initial"
 
 - name: Add "{{ img_name }}" to SSH config file
   blockinfile:
@@ -66,3 +68,8 @@
         UserKnownHostsFile /dev/null
         StrictHostKeyChecking no
         IdentityFile {{ key_file }}
+
+- name: Add VM to inventory
+  add_host:
+      name: vm
+      ansible_host: "{{ ip_addr.stdout }}"
