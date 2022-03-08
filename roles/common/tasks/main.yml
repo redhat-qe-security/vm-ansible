@@ -48,8 +48,8 @@
 
 - name: Get "{{ img_name }}" IP address
   shell: virsh domifaddr "{{ img_name }}"  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
-  register: ip_addr
-  until: ip_addr.stdout | ipaddr
+  register: ip_addr_
+  until: ip_addr_.stdout | ipaddr
   retries: 10
   delay: 6
 
@@ -62,14 +62,15 @@
     backup: yes
     block: |
       Host {{ img_name }}
-        Hostname {{ ip_addr.stdout }}
+        Hostname {{ ip_addr_.stdout }}
         Preferredauthentications publickey
         User root
         UserKnownHostsFile /dev/null
         StrictHostKeyChecking no
+        IdentitiesOnly=yes
         IdentityFile {{ key_file }}
 
 - name: Add VM to inventory
   add_host:
       name: vm
-      ansible_host: "{{ ip_addr.stdout }}"
+      ansible_host: "{{ ip_addr_.stdout }}"
