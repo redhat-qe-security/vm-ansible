@@ -23,10 +23,10 @@
       - gdm
     state: latest
 
-#- name: Install "Server with GUI" group
-#  dnf:
-#    name: "@Server with GUI"
-#    state: present
+- name: Install "Server with GUI" group
+  dnf:
+    name: "@Server with GUI"
+    state: present
 
 - name: Upgrade pip
   pip:
@@ -37,7 +37,7 @@
   dnf:
     autoremove: yes
 
-- name: Create directory {{ item }}
+- name: Create directory
   file:
     path: "{{ item }}"
     state: directory
@@ -97,3 +97,23 @@
 - name: Run prepare command
   shell:
     cmd: python3 /root/SCAutolib/src/env_cli.py prepare --ca --ipa --cards -m --conf /root/configuration.yaml
+
+- name: Set system-wide env varible with service
+  lineinfile:
+    path: "/etc/environment"
+    state: present
+    line: "{{ item.key }}={{ item.val }}"
+  loop:
+    - { val: "{{ ipa_username }}", key: "IPA_USER"}
+    - { val: "virt_cacard_{{ ipa_username }}", key: "IPA_SC" }
+    - { val: "local-user", key: "LOCAL_USER" }
+    - { val: "virt_cacard_local-user", key: "LOCAL_SC" }
+
+- name: System reboot
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
