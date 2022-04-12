@@ -3,22 +3,16 @@
   connection: local
   gather_facts: yes
   pre_tasks:
-    - name: Check if KVM {{ name_ }} with IP exists
+    - name: Check if KVM {{ img_name }} with IP exists
       shell:
-        cmd: virsh domifaddr "{{ name_ }}" 2>/dev/null  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
+        cmd: virsh domifaddr "{{ img_name }}" 2>/dev/null  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
       ignore_errors: true
       register: ip_addr
-
 
   roles:
     - role: common
       when: ip_addr.stdout == ""
-      vars:
-        rhel_version: "{{ rhel }}"
-        img_name: "{{ name_ }}"
-        base_img: "{{ image }}"
-        ssh_key: "{{ key_file }}"
-        repo_file: "./roles/common/files/redhat-{{rhel}}.repo"
+
   tasks:
     - name: Add existing VM to an inventory
       add_host:
@@ -31,4 +25,5 @@
   become: yes
 
   roles:
-    - role: smart-cards
+    - role: smart-card-deps
+    - role: virtual-smart-cards

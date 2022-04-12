@@ -1,8 +1,9 @@
 ---
 # defaults file for common
-rhel: "8.6"
+rhel_version: "8.6"
 home_dir: "{{ lookup('env', 'HOME') }}"
-name_: "rhel-{{ rhel }}"
-image: "{{ home_dir }}/os_dir/rhel-{{ rhel }}"
-key_file: "{{ home_dir }}/.ssh/{{ ansible_user_id }}"
-img_path: "{{ home_dir }}/os_dir/{{ name_ }}.qcow2"
+img_name: "rhel-{{ rhel_version }}"
+base_img: "{{ home_dir }}/os_dir/rhel-{{ rhel_version }}"
+ssh_key: "{{ home_dir }}/.ssh/{{ ansible_user_id }}"
+img_path: "{{ home_dir }}/os_dir/{{ img_name }}.qcow2"
+repo_file: "{{ role_path }}/files/redhat-{{ rhel_version }}.repo"

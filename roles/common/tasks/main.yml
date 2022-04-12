@@ -68,7 +68,7 @@
         UserKnownHostsFile /dev/null
         StrictHostKeyChecking no
         IdentitiesOnly=yes
-        IdentityFile {{ key_file }}
+        IdentityFile {{ ssh_key }}
 
 - name: Add VM to inventory
   add_host:
