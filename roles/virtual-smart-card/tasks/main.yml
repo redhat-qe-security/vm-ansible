@@ -1,0 +1,50 @@
+---
+- name: Upgrade pip
+  pip:
+    name: pip
+    extra_args: --upgrade
+
+- name: Create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - '/root/SCAutolib'
+    - '/root/SC-tests'
+    - '/root/smart-cards'
+
+- name: Mount an NFS SCAutolib
+  ansible.posix.mount:
+    src: "{{ item.export }}"
+    path: "{{ item.mountpoint }}"
+    opts: "rw"
+    state: mounted
+    fstype: nfs
+  loop:
+    - { mountpoint: '/root/SCAutolib', export: "192.168.122.1:{{ home_dir }}/work/crypto/SCAutolib" }
+    - { mountpoint: '/root/SC-tests', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/SC-tests" }
+    - { mountpoint: '/root/smart-cards', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/smart-cards" }
+  ignore_errors: true
+
+- name: "Check if path SCAutolib is installable (setup.py presents)"
+  stat:
+    path: "/root/SCAutolib/setup.py"
+  register: setuppy
+
+- name: Install SCAutolib
+  block:
+    - name: Install SCAutolib with setuptools
+      pip:
+        chdir: '/root/SCAutolib'
+        name: "."
+        extra_args: "-e"
+      failed_when: not setuppy.stat.exists
+  rescue:
+    - name: Link SCAutolib for imports to Python user-site directory
+      shell:
+        cmd: "mkdir -p $(python3 -m site --user-site) && ln -sf /root/SCAutolib $(python3 -m site --user-site)"
+        warn: false
+    - name: Install SCAutolib requirements
+      pip:
+        requirements: "/root/SCAutolib/src/env/requirements.txt"
+        extra_args: --upgrade -I

@@ -1,0 +1,32 @@
+---
+# tasks file for smart-card-deps
+- name: Upgrade the system
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+    update_only: yes
+
+- name: Install DNF groups
+  dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "@Smart Card Support"
+    - "@Server with GUI"
+
+- name: Install additional packages
+  dnf:
+    name:
+      - python3
+      - python3-pip
+      - vim
+      - sssd
+      - sssd-tools
+      - gnutls-utils
+      - gdm
+    state: latest
+
+- name: Remove packages not needed anymore
+  dnf:
+    autoremove: yes

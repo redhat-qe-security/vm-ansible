@@ -1,0 +1,50 @@
+---
+# tasks file for sc-regression-testing
+- name: Install SC test requirements
+  pip:
+    requirements: "/root/SC-tests/requirements.txt"
+    extra_args: --upgrade -I
+
+- name: Copy configuraiong file for SCAutolib to remote
+  copy:
+    src: ../files/configuration.yaml
+    dest: /root/configuration.yaml
+
+- name: Update configuraiong file for SCAutolib
+  replace:
+    path: /root/configuration.yaml
+    regexp: "{{ item.ptrn }}"
+    replace: "{{ item.new }}"
+  loop:
+    - { ptrn: "<server_ip>", new: "{{ server_ip }}" }
+    - { ptrn: "<server_name>", new: "{{ server_name }}.{{ domain }}" }
+    - { ptrn: "<client_name>", new: "{{ client_name }}.{{ domain }}" }
+    - { ptrn: "<domain>", new: "{{ domain }}" }
+    - { ptrn: "<realm>", new: "{{ realm }}" }
+    - { ptrn: "<admin_passwd>", new: "{{ admin_passwd }}" }
+    - { ptrn: "<ipa_user_passwd>", new: "{{ ipa_user_passwd }}" }
+    - { ptrn: "<ipa_username>", new: "{{ ipa_username }}" }
+
+- name: Run prepare command
+  shell:
+    cmd: python3 /root/SCAutolib/src/env_cli.py prepare --ca --ipa --cards -m --conf /root/configuration.yaml
+
+- name: Set system-wide env variable with service
+  lineinfile:
+    path: "/etc/environment"
+    state: present
+    line: "{{ item.key }}={{ item.val }}"
+  loop:
+    - { val: "{{ ipa_username }}", key: "IPA_USER"}
+    - { val: "virt_cacard_{{ ipa_username }}", key: "IPA_SC" }
+    - { val: "local-user", key: "LOCAL_USER" }
+    - { val: "virt_cacard_local-user", key: "LOCAL_SC" }
+
+- name: System reboot
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami

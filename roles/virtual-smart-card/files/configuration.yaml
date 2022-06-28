@@ -1,0 +1,26 @@
+---
+root_passwd: "redhat"
+ca_dir: "/root/ca_dir"
+
+ipa_server_root: "redhat"
+ipa_server_ip: "<server_ip>"
+ipa_server_hostname: "<server_name>"
+ipa_client_hostname: "<client_name>"
+ipa_domain: "<domain>"
+ipa_realm: "<realm>"
+ipa_server_admin_passwd: "<admin_passwd>"
+
+local_user:
+    name: "local-user"
+    passwd: "654321"
+    pin: "123456"
+    card_dir: "/root/local-user"
+    local: true
+ipa_user:
+    name: "<ipa_username>"
+    passwd: "<ipa_user_passwd>"
+    pin: "123456"
+    card_dir: "/root/<ipa_username>"
+    cert: "/root/<ipa_username>/cert.pem"
+    key: "/root/<ipa_username>/private.key"
+    local: false
