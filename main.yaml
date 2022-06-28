@@ -4,12 +4,6 @@
 
   roles:
     - role: common
-      vars:
-        rhel_version: "{{ rhel }}"
-        img_name: "{{ name_ }}"
-        base_img: "{{ image }}"
-        ssh_key: "{{ key_file }}"
-        repo_file: "./roles/common/files/redhat-{{rhel}}.repo"
 
 - hosts: vm
   tasks:

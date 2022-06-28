@@ -61,7 +61,7 @@
     path: /home/{{ ansible_user_id }}/.ssh/config
     backup: yes
     block: |
-      Host {{ img_name }}
+      Host {{ ip_addr_.stdout }} {{ img_name }}
         Hostname {{ ip_addr_.stdout }}
         Preferredauthentications publickey
         User root

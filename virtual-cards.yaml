@@ -26,4 +26,4 @@
 
   roles:
     - role: smart-card-deps
-    - role: virtual-smart-cards
+    - role: virtual-smart-card
