@@ -9,7 +9,6 @@
       ignore_errors: true
       register: ip_addr
 
-
   roles:
     - role: common
       when: ip_addr.stdout == ""
@@ -24,7 +23,18 @@
 - hosts: vm
   user: root
   become: yes
+  vars:
+    ipadm_password: "SECret.123"
+    ipaadmin_password: "SECret.123"
+    ipaserver_realm: "TEST.LOCAL"
+    ipaserver_domain: "test.local"
+  pre_tasks:
+    - name: Set fully-qualified hostname
+      hostname:
+        name: "{{ img_name }}.{{ ipaserver_domain }}"
+        use: systemd
 
   roles:
-    - smart-card-deps
-#    - role: real-smart-card
+    - role: ipaserver
+      state: present
+    - role: ipa-server

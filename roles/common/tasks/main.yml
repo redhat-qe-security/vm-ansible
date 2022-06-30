@@ -49,7 +49,7 @@
 - name: Get "{{ img_name }}" IP address
   shell: virsh domifaddr "{{ img_name }}"  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
   register: ip_addr_
-  until: ip_addr_.stdout | ipaddr
+  until: ip_addr_.stdout != '' and ip_addr_.stdout | ansible.utils.ipaddr
   retries: 10
   delay: 6
 
@@ -60,6 +60,7 @@
   blockinfile:
     path: /home/{{ ansible_user_id }}/.ssh/config
     backup: yes
+    marker: "# {mark} {{ img_name }}"
     block: |
       Host {{ ip_addr_.stdout }} {{ img_name }}
         Hostname {{ ip_addr_.stdout }}
@@ -74,3 +75,4 @@
   add_host:
       name: vm
       ansible_host: "{{ ip_addr_.stdout }}"
+      ansible_ssh_private_key_file: "{{ ssh_key }}"

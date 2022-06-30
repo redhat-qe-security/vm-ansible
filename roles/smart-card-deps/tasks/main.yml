@@ -25,6 +25,8 @@
       - sssd-tools
       - gnutls-utils
       - gdm
+      - gcc
+      - make
     state: latest
 
 - name: Remove packages not needed anymore
