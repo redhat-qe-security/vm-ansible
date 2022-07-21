@@ -1,0 +1,11 @@
+---
+- hosts: vm
+  user: root
+  become: yes
+
+  pre_tasks:
+    - name: Run playbooks for Smart Card VM setup
+      include: setup-vm.yaml
+
+  roles:
+    - role: sc-unit-testing
