@@ -1,0 +1,6 @@
+---
+# defaults file for ipa-server
+domain: "test.local"
+realm: "{{ domain|upper }}"
+server_hostname: "ipa-server.{{ domain }}"
+admin_passwd: "SECret.123"

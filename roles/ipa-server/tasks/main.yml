@@ -1,0 +1,19 @@
+---
+# tasks file for ipa-server
+- name: Set default certmap rule
+  shell:
+    cmd: "ipa certmaprule-add ipa_default_rule 
+          --maprule='(|(userCertificate;binary={cert!bin})(ipacertmapdata=X509: <I>{issuer_dn!nss_x500}<S>{subject_dn!nss_x500}))'
+          --matchrule=\"<ISSUER>CN=Certificate Authority,O={{ ipaserver_realm }}\"
+          --domain=\"{{ ipaserver_domain }}\""
+- name: Add ls to sudo commands
+  shell: ipa sudocmd-add --desc "List given directory" /usr/bin/ls
+
+- name: Add general sudo rule
+  shell: ipa sudorule-add "General" --desc "General sudo rule" --usercat all --hostcat all --cmdcat all
+
+- name: Gen smart card script for IPA server
+  shell: ipa-advise config-server-for-smart-card-auth > ipa-server-sc.sh
+
+- name: Run smart card script for IPA server
+  shell: bash ./ipa-server-sc.sh /etc/ipa/ca.crt

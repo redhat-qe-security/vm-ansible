@@ -17,7 +17,7 @@
   ansible.posix.mount:
     src: "{{ item.export }}"
     path: "{{ item.mountpoint }}"
-    opts: "rw"
+    opts: "rw,_netdev"
     state: mounted
     fstype: nfs
   loop:

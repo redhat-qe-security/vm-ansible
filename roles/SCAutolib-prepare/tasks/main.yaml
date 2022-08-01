@@ -1,0 +1,26 @@
+---
+- name: Copy configuration file for SCAutolib
+  copy:
+    src: "{{ conf_file_path }}"
+    dest: /root/conf.json
+
+- name: Run prepare command
+  shell:
+    cmd: scauto prepare --force --gdm --install-missing --conf /root/conf.json
+
+- name: Set default target to graphical.target
+  shell: systemctl set-default graphical.target
+
+- name: Set eth0 device to UP after reboot
+  cron:
+    name: eth0-up
+    special_time: reboot
+    job: nmcli dev up eth0
+
+- name: Reboot the system
+  reboot:
+
+- name: Delete eth0 device up crontab
+  cron:
+    name: eth0-up
+    state: absent

@@ -1,10 +1,9 @@
 ---
+- import_playbook : setup-vm.yaml
+
 - hosts: vm
   user: root
   become: yes
-  pre_tasks:
-    - name: Run playbook for VM setup
-      include: setup-vm.yaml
 
   roles:
     - role: smart-card-deps
