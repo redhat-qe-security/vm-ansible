@@ -2,6 +2,7 @@
 - name: Check if base image is valid URI
   uri:
     url: "{{ base_img }}"
+    method: HEAD
     validate_certs: no
   register: base_img_uri
   ignore_errors: true
@@ -46,4 +47,4 @@
     mode: 0644
     remote_src: yes
     follow: yes
-  when: (base_img_stat is defined) and (base_img_stat.stat.exists)
+  when: base_img_uri.failed and defined and base_img_stat.stat.exists
