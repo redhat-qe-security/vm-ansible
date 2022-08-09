@@ -1,11 +1,19 @@
 ---
 # tasks file for ipa-server
+- name: Obtain krb kredentials
+  shell:
+    cmd: kinit admin
+    stdin: "{{ admin_passwd }}"
+  when: admin_passwd is defined
+
 - name: Set default certmap rule
   shell:
-    cmd: "ipa certmaprule-add ipa_default_rule 
+    cmd: "ipa certmaprule-add ipa_default_rule
           --maprule='(|(userCertificate;binary={cert!bin})(ipacertmapdata=X509: <I>{issuer_dn!nss_x500}<S>{subject_dn!nss_x500}))'
           --matchrule=\"<ISSUER>CN=Certificate Authority,O={{ ipaserver_realm }}\"
           --domain=\"{{ ipaserver_domain }}\""
+  ignore_errors: true
+
 - name: Add ls to sudo commands
   shell: ipa sudocmd-add --desc "List given directory" /usr/bin/ls
 

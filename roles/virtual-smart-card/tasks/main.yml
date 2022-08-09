@@ -26,6 +26,24 @@
     - { mountpoint: '/root/smart-cards', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/smart-cards" }
   ignore_errors: true
 
+- name: Enable COPR repository fro virt_cacard package
+  shell: dnf -y copr enable jjelen/vsmartcard
+
+- name: Import GPG key from COPR repository
+  rpm_key:
+    state: present
+    key: https://download.copr.fedorainfracloud.org/results/jjelen/vsmartcard/pubkey.gpg
+
+- name: Install RPM packages for virtual cards
+  dnf:
+    name:
+      - softhsm
+      - pcsc-lite-ccid
+      - pcsc-lite
+      - virt_cacard
+      - vpcd
+    state: latest
+
 - name: "Check if path SCAutolib is installable (setup.py presents)"
   stat:
     path: "/root/SCAutolib/setup.py"

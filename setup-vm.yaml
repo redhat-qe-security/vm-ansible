@@ -1,5 +1,5 @@
 ---
-- hosts: 127.0.0.1
+- hosts: localhost
   connection: local
   gather_facts: yes
   pre_tasks:
@@ -10,6 +10,7 @@
       register: ip_addr
 
   roles:
+    - role: check-image
     - role: common
       when: ip_addr.stdout == ""
 

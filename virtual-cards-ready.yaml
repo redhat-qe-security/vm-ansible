@@ -1,10 +1,11 @@
 ---
 - import_playbook: setup-vm.yaml
-- import_playbook: virtual-cards.yaml
 
 - hosts: vm
   user: root
   become: yes
 
   roles:
+    - role: smart-card-deps
+    - role: virtual-smart-card
     - role: SCAutolib-prepare

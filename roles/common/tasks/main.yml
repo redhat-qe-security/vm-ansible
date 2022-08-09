@@ -1,15 +1,4 @@
 ---
-- name: Check image name
-  stat:
-    path: "{{ img_path }}"
-  register: img_stat_result
-
-- name: Copy image
-  copy:
-    src: "{{ base_img }}"
-    dest: "{{ img_path }}"
-  when: not img_stat_result.stat.exists
-
 - name: Check SSh key
   stat:
     path: "{{ssh_key}}"
@@ -19,15 +8,46 @@
   openssh_keypair:
     path: "{{ ssh_key }}"
     type: rsa
-    size: 4096
+    size: 2048
     state: present
     force: no
   when: not stat_result.stat.exists
 
 - name: Check repo file
-  file:
+  stat:
     path: "{{ repo_file }}"
-    state: file
+    follow: yes
+  register: repo_file_stat
+
+- name: Prepare repo file
+  block:
+    - name: Copy repo file template to {{ repo_file }}
+      copy:
+        src: "{{ role_path }}/files/template.repo"
+        dest: "{{ repo_file }}"
+
+    - name: Update repo file
+      replace:
+        path: "{{ repo_file }}"
+        regexp: '\{\{repo_base_url\}\}'
+        replace: "{{ repo_base_url }}"
+        backup: yes
+
+    - name: Update buidlroot repo if set
+      blockinfile:
+        path: "{{ repo_file }}"
+        backup: yes
+        marker: "\n"
+        marker_begin: ""
+        marker_end: ""
+        block: |
+          [buildroot]
+          name=Buildroot
+          baseurl="{{ repo_buildroot_url }}"
+          gpgcheck=0
+          enabled=1
+      when: repo_base_url is defined
+  when: not repo_file_stat.stat.exists
 
 - name: Prepare VM (virt-sysprep)
   shell:

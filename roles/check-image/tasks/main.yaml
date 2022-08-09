@@ -1,0 +1,49 @@
+---
+- name: Check if base image is valid URI
+  uri:
+    url: "{{ base_img }}"
+    validate_certs: no
+  register: base_img_uri
+  ignore_errors: true
+
+- name: Debug base_img_uri
+  ansible.builtin.debug:
+    var: base_img_uri
+
+- name: Download base image
+  block:
+    - name: Check if destination folder "{{ os_dir }}" exists
+      stat:
+        path: "{{ os_dir }}"
+      register: os_dir_stat
+
+    - name: Create destination folder "{{ os_dir }}" if it doesn't exist
+      file:
+        path: "{{ os_dir }}"
+        state: directory
+      when: os_dir_stat.stat.exists == False
+
+    - name: Download image to "{{ img_path }}"
+      get_url:
+        url: "{{ base_img }}"
+        dest: "{{ img_path }}"
+        validate_certs: no
+  when: base_img_uri.status == 200
+
+- name: Check if base image is valid file
+  stat:
+    path: "{{ base_img }}"
+    follow: yes
+  register: base_img_stat
+  when: base_img_uri.failed
+
+- name: Copy base image to "{{ img_path }}"
+  copy:
+    src: "{{ base_img }}"
+    dest: "{{ img_path }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: 0644
+    remote_src: yes
+    follow: yes
+  when: (base_img_stat is defined) and (base_img_stat.stat.exists)

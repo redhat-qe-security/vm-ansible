@@ -1,24 +1,5 @@
 ---
-- hosts: 127.0.0.1
-  connection: local
-  gather_facts: yes
-  pre_tasks:
-    - name: Check if KVM {{ img_name }} with IP exists
-      shell:
-        cmd: virsh domifaddr "{{ img_name }}" 2>/dev/null  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
-      ignore_errors: true
-      register: ip_addr
-
-  roles:
-    - role: common
-      when: ip_addr.stdout == ""
-  tasks:
-    - name: Add existing VM to an inventory
-      add_host:
-        name: vm
-        ansible_host: "{{ ip_addr.stdout }}"
-        ansible_ssh_private_key_file: "{{ ssh_key }}"
-      when:  ip_addr.stdout != ""
+- import_playbook: setup-vm.yaml
 
 - hosts: vm
   user: root
@@ -28,6 +9,8 @@
     ipaadmin_password: "SECret.123"
     ipaserver_realm: "TEST.LOCAL"
     ipaserver_domain: "test.local"
+    ipaserver_setup_dns: true
+    ipaserver_auto_forwarders: true
   pre_tasks:
     - name: Set fully-qualified hostname
       hostname:

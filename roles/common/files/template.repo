@@ -1,0 +1,11 @@
+[rhel_appstream]
+name=AppStream
+baseurl={{repo_base_url}}/AppStream/x86_64/os/
+enabled=1
+gpgcheck=0
+
+[rhel_baseos]
+name=BaseOS
+baseurl={{repo_base_url}}/BaseOS/x86_64/os/
+gpgcheck=0
+enabled=1
