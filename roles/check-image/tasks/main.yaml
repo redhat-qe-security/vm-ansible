@@ -7,10 +7,6 @@
   register: base_img_uri
   ignore_errors: true
 
-- name: Debug base_img_uri
-  ansible.builtin.debug:
-    var: base_img_uri
-
 - name: Download base image
   block:
     - name: Check if destination folder "{{ os_dir }}" exists
@@ -44,7 +40,6 @@
     dest: "{{ img_path }}"
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
-    mode: 0644
     remote_src: yes
     follow: yes
   when: base_img_uri.failed and defined and base_img_stat.stat.exists

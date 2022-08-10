@@ -58,7 +58,7 @@
           --ssh-inject root:file:"{{ ssh_key }}.pub" \
           --upload "{{ repo_file }}":/etc/yum.repos.d/redhat.repo \
           -a "{{ img_path }}" \
-          -c qemu:///system
+          --connect qemu:///system
 
 - name: Install VM (virt-install)
   shell:
@@ -67,14 +67,14 @@
                    --name "{{ img_name }}" --check all=off --disk path="{{ img_path }}" 
 
 - name: Get "{{ img_name }}" IP address
-  shell: virsh domifaddr "{{ img_name }}"  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
+  shell: virsh --connect qemu:///system domifaddr "{{ img_name }}"  | grep -o -E "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.?)){4}"
   register: ip_addr_
   until: ip_addr_.stdout != '' and ip_addr_.stdout | ansible.utils.ipaddr
   retries: 10
   delay: 6
 
 - name: Create initial snapshot
-  shell: virsh snapshot-create-as --domain "{{ img_name }}" --name "initial"
+  shell: virsh --connect qemu:///system snapshot-create-as --domain "{{ img_name }}" --name "initial"
 
 - name: Add "{{ img_name }}" to SSH config file
   blockinfile:
