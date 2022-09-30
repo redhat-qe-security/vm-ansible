@@ -1,0 +1,17 @@
+---
+- import_playbook: ipa-server.yaml
+- import_playbook: virtual-cards-ready.yaml
+
+- hosts: vm
+  user: root
+  become: yes
+
+  tasks:
+    - name: Install pytest and deps
+      pip:
+        name:
+          - pytest
+          - pytest-env
+        extra_args: --upgrade
+    - name: Execute all tests
+      shell: pytest -sv ./ --ipa-ip

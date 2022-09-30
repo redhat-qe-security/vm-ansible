@@ -22,8 +22,7 @@
     fstype: nfs
   loop:
     - { mountpoint: '/root/SCAutolib', export: "192.168.122.1:{{ home_dir }}/work/crypto/SCAutolib" }
-    - { mountpoint: '/root/SC-tests', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/SC-tests" }
-    - { mountpoint: '/root/smart-cards', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/smart-cards" }
+    - { mountpoint: '/root/SC-tests', export: "192.168.122.1:{{ home_dir }}/work/crypto/tests/rh-internal-SC-tests" }
   ignore_errors: true
 
 - name: Enable COPR repository fro virt_cacard package

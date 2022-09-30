@@ -27,19 +27,18 @@
         validate_certs: no
   when: base_img_uri.status == 200
 
-- name: Check if base image is valid file
+- name: Check if base image "{{ base_img }}" is valid file
   stat:
     path: "{{ base_img }}"
     follow: yes
   register: base_img_stat
   when: base_img_uri.failed
 
-- name: Copy base image to "{{ img_path }}"
+- name: Copy base {{ base_img }} image to {{ img_path }}
   copy:
     src: "{{ base_img }}"
     dest: "{{ img_path }}"
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
-    remote_src: yes
     follow: yes
-  when: base_img_uri.failed and defined and base_img_stat.stat.exists
+  when: base_img_uri.failed and base_img_stat.stat.exists

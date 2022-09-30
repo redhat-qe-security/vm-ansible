@@ -1,0 +1,59 @@
+---
+- name: Make sure packages for KVM are installed
+  dnf:
+    name:
+      - virt-install
+      - virt-sysprep
+      - virt-manager
+      - libvirt
+      - guestfs-tools
+      - @virtualization
+    state: latest
+  when: ansible_os_family == "redhat"
+
+- name: Check QEMU setup for user {{ ansible_user_id }}
+  block:
+    - name: Check user groups
+      user:
+        name: "{{ ansible_user_id }}"
+        append: yes
+        groups:
+          - kvm
+          - libvirt
+    - name: Create user's QEMU config file
+      block:
+        - name: Create user's .config/libivrt dir
+          file:
+            name: "{{ home_dir }}/.config/libvirt"
+            state: directory
+            owner: "{{ ansible_user_id }}"
+
+        - name: Create qemu.conf
+          blockinfile:
+            path: "{{ home_dir }}/.config/libvirt/qemu.conf"
+            block: |
+              # The user for QEMU processes run by the system instance. It can be
+              # specified as a user name or as a user id. The qemu driver will try to
+              # parse this value first as a name and then, if the name doesn't exist,
+              # as a user id.
+              #
+              # Since a sequence of digits is a valid user name, a leading plus sign
+              # can be used to ensure that a user id will not be interpreted as a user
+              # name.
+              #
+              # Some examples of valid values are:
+              #
+              #       user = "qemu"   # A user named "qemu"
+              #       user = "+0"     # Super user (uid=0)
+              #       user = "100"    # A user named "100" or a user with uid=100
+
+              user = ""{{ ansible_user_id }}""
+
+              # The group for QEMU processes run by the system instance. It can be
+              # specified in a similar way to user.
+              group = "libvirt"
+              
+              # Whether libvirt should dynamically change file ownership
+              # to match the configured user/group above. Defaults to 1.
+              # Set to 0 to disable file ownership changes.
+              dynamic_ownership = 1 
